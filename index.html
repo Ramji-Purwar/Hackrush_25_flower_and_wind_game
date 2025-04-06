@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flower and Wind Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .rules-content {
+      display: none;
+      background: var(--rules-bg);
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin-top: 0.8rem;
+      border-left: 4px solid var(--info);
+    }
+    
+    .rules-toggle {
+      background: var(--info);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin: 1.5rem 0 0.5rem 0;
+    }
+    
+    .rules-toggle:hover {
+      background: var(--info-hover);
+    }
+    
+    .rules-toggle::after {
+      content: "▼";
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+      transition: transform 0.2s ease;
+    }
+    
+    .rules-toggle.active::after {
+      transform: rotate(180deg);
+    }
+    
+    .difficulty-selection {
+      display: none;
+      margin-top: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .difficulty-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .difficulty-buttons button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .difficulty-buttons button:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    .difficulty-title {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .back-button {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--primary);
+      padding: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .back-button:hover {
+      color: var(--secondary);
+      transform: translateX(-3px);
+    }
+    
+    .menu-card {
+      position: relative;
+    }
+    
+    .rules-section h3 {
+      color: var(--primary);
+      margin: 1rem 0 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    .rules-section ul {
+      padding-left: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .rules-section li {
+      margin-bottom: 0.3rem;
+    }
+    
+    .menu-buttons {
+      margin-top: 1rem;
+    }
+
+    /* Theme Switcher */
+    .theme-switcher {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .theme-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--text-color);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-btn.active {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    #lightTheme {
+      background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+    }
+
+    #darkTheme {
+      background: linear-gradient(135deg, #2d3748, #1a202c);
+    }
+
+    #neonTheme {
+      background: linear-gradient(135deg, #0f0c29, #302b63);
+    }
+  </style>
+</head>
+<body>
+  <div class="menu-container">
+    <div class="menu-card">
+      <!-- Theme Switcher -->
+      <div class="theme-switcher">
+        <div id="lightTheme" class="theme-btn active" onclick="setTheme('light')"></div>
+        <div id="darkTheme" class="theme-btn" onclick="setTheme('dark')"></div>
+        <div id="neonTheme" class="theme-btn" onclick="setTheme('neon')"></div>
+      </div>
+      
+      <!-- Back Button -->
+      <button class="back-button" id="backButton" onclick="hideDifficultySelection()" style="display: none;">
+        ←
+      </button>
+      
+      <h1>Flower & Wind</h1>
+      <p class="tagline">Bloom wisely, spread strategically</p>
+
+      <!-- Rules Section -->
+      <div class="rules-section">
+        <button class="rules-toggle" id="rulesToggle" onclick="toggleRules()">How to Play</button>
+        <div class="rules-content" id="rulesContent">
+          <h3>Game Objective</h3>
+          <p>The flower player must spread as little as possible. The wind (AI) tries to spread seeds 🌱.</p>
+          
+          <h3>Game Flow</h3>
+          <ul>
+            <li>Each turn, the flower 🌸 places a flower on an empty cell.</li>
+            <li>Then, the wind 💨 spreads seeds in one of 8 directions.</li>
+            <li>The wind cannot repeat directions already used.</li>
+            <li>After 7 rounds, the game ends.</li>
+          </ul>
+          
+          <h3>Win Conditions</h3>
+          <ul>
+            <li>If all cells are filled, 🌸 wins.</li>
+            <li>If time runs out (7 moves) and the board is not full, 💨 wins.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Main Menu Buttons -->
+      <div class="menu-buttons" id="mainMenuButtons">
+        <button onclick="window.location.href='multiplayer.html'">Multiplayer</button>
+        <button onclick="showDifficultySelection()">VS Computer</button>
+      </div>
+      
+      <!-- Difficulty Selection -->
+      <div class="difficulty-selection" id="difficultySelection">
+        <div class="difficulty-title">Select Difficulty Level</div>
+        <div class="difficulty-buttons">
+          <button onclick="startVsComputer('easy')">Easy</button>
+          <button onclick="startVsComputer('medium')">Medium</button>
+          <button onclick="startVsComputer('hard')">Hard</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showDifficultySelection() {
+      document.getElementById('mainMenuButtons').style.display = 'none';
+      document.getElementById('difficultySelection').style.display = 'block';
+      document.getElementById('backButton').style.display = 'block';
+      document.querySelector('h1').style.marginTop = '1.5rem';
+    }
+    
+    function hideDifficultySelection() {
+      document.getElementById('difficultySelection').style.display = 'none';
+      document.getElementById('mainMenuButtons').style.display = 'flex';
+      document.getElementById('backButton').style.display = 'none';
+      document.querySelector('h1').style.marginTop = '0';
+    }
+
+    function startVsComputer(difficulty) {
+      if (difficulty === "easy") {
+        window.location.href = "vs-computer-easy.html";
+      } else if (difficulty === "medium") {
+        window.location.href = "vs-computer-medium.html";
+      } else if (difficulty === "hard") {
+        window.location.href = "vs-computer-hard.html";
+      }
+    }
+
+    function toggleRules() {
+      const rules = document.getElementById("rulesContent");
+      const toggleBtn = document.getElementById("rulesToggle");
+      const isShowing = rules.style.display === "block";
+      
+      rules.style.display = isShowing ? "none" : "block";
+      toggleBtn.classList.toggle("active", !isShowing);
+    }
+
+    // Theme Functions
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      // Update active button
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`${theme}Theme`).classList.add('active');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+  </script>
+</body>
+</html>

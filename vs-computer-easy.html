@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flower vs Wind - Easy Mode</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Theme Switcher */
+    .theme-switcher {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .theme-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--text-color);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-btn.active {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    #lightTheme {
+      background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+    }
+
+    #darkTheme {
+      background: linear-gradient(135deg, #2d3748, #1a202c);
+    }
+
+    #neonTheme {
+      background: linear-gradient(135deg, #0f0c29, #302b63);
+    }
+
+    /* Back Button */
+    .back-button {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--primary);
+      padding: 0.5rem;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .back-button:hover {
+      color: var(--secondary);
+      transform: translateX(-3px);
+    }
+
+    /* Game Specific Styles */
+    .game-wrapper {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      padding-top: 3rem; /* Added space for back button */
+      width: 100%;
+      max-width: 500px;
+      margin: 2rem auto;
+      position: relative;
+    }
+
+    [data-theme="light"] .game-wrapper,
+    [data-theme="dark"] .game-wrapper {
+      border: 2px solid var(--light);
+    }
+
+    [data-theme="neon"] .game-wrapper {
+      border: 1px solid var(--primary);
+    }
+
+    .game-wrapper h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    [data-theme="neon"] .game-wrapper h1 {
+      text-shadow: 0 0 10px var(--primary);
+    }
+
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #turnCounter {
+      font-size: 1.1rem;
+      color: var(--text-color);
+      margin: 1rem 0;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    #gameBoard {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 1.5rem auto;
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    [data-theme="light"] #gameBoard,
+    [data-theme="dark"] #gameBoard {
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="neon"] #gameBoard {
+      border: 1px solid var(--primary);
+      box-shadow: 0 0 15px var(--primary);
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      background: var(--light);
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--cell-border);
+    }
+
+    /* Theme-specific cell borders */
+    [data-theme="light"] .cell {
+      --cell-border: rgba(0, 0, 0, 0.15);
+    }
+    
+    [data-theme="dark"] .cell {
+      --cell-border: rgba(255, 255, 255, 0.15);
+    }
+    
+    [data-theme="neon"] .cell {
+      --cell-border: var(--primary);
+      border-width: 1.5px;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="neon"] .cell:hover {
+      box-shadow: 0 0 15px var(--primary);
+      border-color: var(--secondary);
+    }
+
+    .cell.flower {
+      background: var(--flower-bg);
+      color: var(--flower-color);
+      border-color: var(--flower-color);
+    }
+
+    [data-theme="neon"] .cell.flower {
+      text-shadow: 0 0 10px var(--flower-color);
+      box-shadow: 0 0 15px var(--flower-color);
+      border-color: var(--flower-color);
+    }
+
+    .cell.seed {
+      background: var(--seed-bg);
+      color: var(--seed-color);
+      border-color: var(--seed-color);
+    }
+
+    [data-theme="neon"] .cell.seed {
+      text-shadow: 0 0 10px var(--seed-color);
+      box-shadow: 0 0 15px var(--seed-color);
+      border-color: var(--seed-color);
+    }
+
+    #gameMessage {
+      font-size: 1.3rem;
+      font-weight: bold;
+      text-align: center;
+      margin: 1rem 0;
+      color: var(--accent);
+      min-height: 2rem;
+    }
+
+    [data-theme="neon"] #gameMessage {
+      text-shadow: 0 0 5px var(--accent);
+    }
+
+    /* Popup Styles */
+    .game-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .popup-content {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      animation: popIn 0.3s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .popup-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+
+    .popup-content h2 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
+
+    [data-theme="neon"] .popup-content h2 {
+      text-shadow: 0 0 5px var(--primary);
+    }
+
+    .popup-content button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 1rem;
+      font-weight: 500;
+      width: 100%;
+      max-width: 200px;
+    }
+
+    [data-theme="neon"] .popup-content button {
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .popup-content button:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(106, 90, 205, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      .game-wrapper {
+        padding: 1.5rem;
+        padding-top: 3rem;
+        margin: 1rem;
+      }
+      
+      .cell {
+        font-size: 1.5rem;
+      }
+      
+      .popup-content {
+        padding: 1.5rem;
+      }
+      
+      .popup-content h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme Switcher -->
+  <div class="theme-switcher">
+    <div id="lightTheme" class="theme-btn" onclick="setTheme('light')"></div>
+    <div id="darkTheme" class="theme-btn" onclick="setTheme('dark')"></div>
+    <div id="neonTheme" class="theme-btn" onclick="setTheme('neon')"></div>
+  </div>
+
+  <!-- Back Button -->
+  <button class="back-button" onclick="window.location.href='index.html'">←</button>
+
+  <div class="game-wrapper">
+    <h1>🌼 Flower vs Wind</h1>
+    <div id="gameContainer">
+      <div id="turnCounter">Turns left: 7</div>
+      <div id="gameBoard"></div>
+      <div id="gameMessage"></div>
+    </div>
+  </div>
+
+  <!-- Game End Popup -->
+  <div id="gamePopup" class="game-popup">
+    <div class="popup-content">
+      <h2 id="popupMessage">Game Over</h2>
+      <button id="playAgainBtn">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    // Theme Functions
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      // Update active button
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`${theme}Theme`).classList.add('active');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+  </script>
+  <script src="vs-computer-easy.js"></script>
+</body>
+</html>

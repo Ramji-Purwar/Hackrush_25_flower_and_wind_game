@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flower vs Wind - Easy Mode</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flower vs Wind - Multiplayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <style>
     /* Theme Switcher */
     .theme-switcher {
@@ -46,36 +49,15 @@
       background: linear-gradient(135deg, #0f0c29, #302b63);
     }
 
-    /* Back Button */
-    .back-button {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--primary);
-      padding: 0.5rem;
-      transition: all 0.2s ease;
-      z-index: 10;
-    }
-
-    .back-button:hover {
-      color: var(--secondary);
-      transform: translateX(-3px);
-    }
-
     /* Game Specific Styles */
     .game-wrapper {
+      width: 100%;
+      max-width: 600px;
       background: var(--card-bg);
       border-radius: 16px;
       box-shadow: var(--shadow);
       padding: 2rem;
-      padding-top: 3rem;
-      width: 100%;
-      max-width: 500px;
-      margin: 2rem auto;
+      text-align: center;
       position: relative;
     }
 
@@ -88,28 +70,77 @@
       border: 1px solid var(--primary);
     }
 
-    .game-wrapper h1 {
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    [data-theme="neon"] .game-wrapper h1 {
-      text-shadow: 0 0 10px var(--primary);
-    }
-
-    #gameContainer {
+    .game-header {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
     }
 
-    #turnCounter {
+    h1 {
+      color: var(--primary);
+      font-size: 2rem;
+    }
+
+    [data-theme="neon"] h1 {
+      text-shadow: 0 0 10px var(--primary);
+    }
+
+    .player-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .player-turn {
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      box-shadow: 0 3px 10px rgba(106, 90, 205, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .player-turn.flower {
+      background: var(--flower-color);
+    }
+
+    .player-turn.wind {
+      background: var(--seed-color);
+    }
+
+    [data-theme="neon"] .player-turn {
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .timer {
+      font-family: var(--timer-font);
+      font-weight: 700;
       font-size: 1.1rem;
-      color: var(--text-color);
-      margin: 1rem 0;
-      text-align: center;
-      font-weight: 500;
+    }
+
+    .timer.warning {
+      color: var(--warning);
+      animation: pulse 1s infinite;
+    }
+
+    .timer.danger {
+      color: var(--danger);
+      animation: pulse 0.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    #gameContainer {
+      position: relative;
     }
 
     #gameBoard {
@@ -197,118 +228,162 @@
       border-color: var(--seed-color);
     }
 
-    #gameMessage {
-      font-size: 1.3rem;
-      font-weight: bold;
-      text-align: center;
-      margin: 1rem 0;
-      color: var(--accent);
-      min-height: 2rem;
-    }
-
-    [data-theme="neon"] #gameMessage {
-      text-shadow: 0 0 5px var(--accent);
-    }
-
-    /* Popup Styles */
-    .game-popup {
+    #directionOverlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.5);
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
-      animation: fadeIn 0.3s ease-out;
+      z-index: 100;
     }
 
-    .popup-content {
+    #directionOverlay.visible {
+      display: flex;
+    }
+
+    .direction-container {
       background: var(--card-bg);
       border-radius: 16px;
       padding: 2rem;
       width: 90%;
-      max-width: 350px;
+      max-width: 300px;
       text-align: center;
       box-shadow: var(--shadow);
-      animation: popIn 0.3s ease-out;
-      position: relative;
-      overflow: hidden;
     }
 
-    .popup-content::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    [data-theme="neon"] .direction-container {
+      border: 1px solid var(--primary);
     }
 
-    .popup-content h2 {
+    #directionPrompt {
+      font-size: 1.2rem;
+      font-weight: 600;
       color: var(--primary);
       margin-bottom: 1.5rem;
-      font-size: 1.8rem;
     }
 
-    [data-theme="neon"] .popup-content h2 {
-      text-shadow: 0 0 5px var(--primary);
+    #directionButtons {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
     }
 
-    .popup-content button {
+    #directionButtons button {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
       background: var(--primary);
       color: white;
       border: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      margin-top: 1rem;
-      font-weight: 500;
-      width: 100%;
-      max-width: 200px;
+      transform-origin: center;
+      margin: 0;
+      padding: 0;
     }
 
-    [data-theme="neon"] .popup-content button {
+    [data-theme="neon"] #directionButtons button {
       box-shadow: 0 0 10px var(--primary);
     }
 
-    .popup-content button:hover {
+    /* Fixed positions */
+    #directionButtons button[data-direction="N"] {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #directionButtons button[data-direction="NE"] {
+      top: 15%;
+      right: 15%;
+    }
+    #directionButtons button[data-direction="E"] {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+    }
+    #directionButtons button[data-direction="SE"] {
+      bottom: 15%;
+      right: 15%;
+    }
+    #directionButtons button[data-direction="S"] {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #directionButtons button[data-direction="SW"] {
+      bottom: 15%;
+      left: 15%;
+    }
+    #directionButtons button[data-direction="W"] {
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+    #directionButtons button[data-direction="NW"] {
+      top: 15%;
+      left: 15%;
+    }
+
+    #directionButtons button:disabled {
+      background: var(--light);
+      color: var(--text-color);
+      cursor: not-allowed;
+    }
+
+    /* Fixed hover states */
+    #directionButtons button:hover:not(:disabled) {
       background: var(--secondary);
-      transform: translateY(-2px);
-      box-shadow: 0 3px 10px rgba(106, 90, 205, 0.2);
+      transform: scale(1.1);
+    }
+    #directionButtons button[data-direction="N"]:hover:not(:disabled),
+    #directionButtons button[data-direction="S"]:hover:not(:disabled) {
+      transform: translateX(-50%) scale(1.1);
+    }
+    #directionButtons button[data-direction="E"]:hover:not(:disabled),
+    #directionButtons button[data-direction="W"]:hover:not(:disabled) {
+      transform: translateY(-50%) scale(1.1);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .game-info {
+      margin-top: 1.5rem;
     }
 
-    @keyframes popIn {
-      0% { transform: scale(0.9); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+    #turnCounter {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    #gameMessage {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      color: var(--flower-color);
+    }
+
+    [data-theme="neon"] #gameMessage {
+      text-shadow: 0 0 5px var(--flower-color);
     }
 
     @media (max-width: 600px) {
       .game-wrapper {
         padding: 1.5rem;
-        padding-top: 3rem;
-        margin: 1rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
       }
       
       .cell {
-        font-size: 1.5rem;
-      }
-      
-      .popup-content {
-        padding: 1.5rem;
-      }
-      
-      .popup-content h2 {
         font-size: 1.5rem;
       }
     }
@@ -322,23 +397,35 @@
     <div id="neonTheme" class="theme-btn" onclick="setTheme('neon')"></div>
   </div>
 
-  <!-- Back Button -->
-  <button class="back-button" onclick="window.location.href='index.html'">←</button>
-
   <div class="game-wrapper">
-    <h1>🌼 Flower vs Wind</h1>
-    <div id="gameContainer">
-      <div id="turnCounter">Turns left: 7</div>
-      <div id="gameBoard"></div>
-      <div id="gameMessage"></div>
+    <div class="game-header">
+      <h1>🌸 Flower vs Wind 💨</h1>
+      <div class="player-info">
+        <div id="turnIndicator" class="player-turn flower">
+          <span>🌸 Flower's Turn</span>
+          <span id="flowerTimer" class="timer">2:30</span>
+        </div>
+        <div id="windIndicator" class="player-turn" style="opacity: 0.5;">
+          <span>💨 Wind's Turn</span>
+          <span id="windTimer" class="timer">2:30</span>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Game End Popup -->
-  <div id="gamePopup" class="game-popup">
-    <div class="popup-content">
-      <h2 id="popupMessage">Game Over</h2>
-      <button id="playAgainBtn">Play Again</button>
+    <div id="gameContainer">
+      <div id="gameBoard"></div>
+      
+      <div id="directionOverlay">
+        <div class="direction-container">
+          <div id="directionPrompt">💨 Choose Wind Direction</div>
+          <div id="directionButtons"></div>
+        </div>
+      </div>
+      
+      <div class="game-info">
+        <div id="turnCounter">Turns left: 7</div>
+        <div id="gameMessage" class="announcement"></div>
+      </div>
     </div>
   </div>
 
@@ -359,6 +446,6 @@
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
   </script>
-  <script src="vs-computer-easy.js"></script>
+  <script src="multiplayer.js"></script>
 </body>
 </html>
